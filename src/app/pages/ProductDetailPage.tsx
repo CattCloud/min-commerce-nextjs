@@ -2,17 +2,28 @@ import { useState } from 'react';
 import { redirect } from 'next/navigation';
 import { useParams } from 'next/navigation'; // Hook de Next.js para leer parámetros
 import { ShoppingCart } from 'lucide-react';
-import { products } from '../data/products'; 
+import { products } from '../data/products';
 import { formatPrice } from '../utils/price';
-import { useCart } from '../context/cart/CartContext';
-import QuantitySelector from '../components/QuantitySelector'; 
+import { useCartStore } from '../../store/useCartStore';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { quantitySchema, QuantityFormData } from '../../schemas/cart';
 
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { addToCart } = useCart();
-  const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCartStore();
   const [showNotification, setShowNotification] = useState(false);
+
+  const form = useForm<QuantityFormData>({
+    resolver: zodResolver(quantitySchema),
+    defaultValues: {
+      quantity: 1,
+    },
+  });
 
   // Buscar el producto por ID
   const product = products.find(p => p.id === id);
@@ -23,8 +34,8 @@ const ProductDetailPage: React.FC = () => {
   }
 
   // Manejador para añadir al carrito
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
+  const handleAddToCart = (data: QuantityFormData) => {
+    addToCart(product, data.quantity);
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 3000); // Ocultar notificacin despus de 3s
   };
@@ -63,25 +74,38 @@ const ProductDetailPage: React.FC = () => {
             <hr className="border-border-default" />
 
             {/* Selector de Cantidad */}
-            <div className="flex items-center space-x-4">
-              <span className="text-text-primary font-semibold">Cantidad:</span>
-              <QuantitySelector 
-                quantity={quantity} 
-                onUpdate={setQuantity}
-              />
-            </div>
-            
-            
-            <button
-              onClick={handleAddToCart}
-              className="flex items-center justify-center w-full p-4 
-                         bg-primary-500 text-bg-card font-extrabold text-lg 
-                         hover:bg-primary-dark transition-colors 
-                         focus:ring-4 focus:ring-primary-500 focus:ring-opacity-50 cursor-pointer"
-            >
-              <ShoppingCart size={24} className="mr-3" />
-              Añadir al Carrito
-            </button>
+            <form onSubmit={form.handleSubmit(handleAddToCart)}>
+              <div className="space-y-2">
+                <label htmlFor="quantity" className="text-text-primary font-semibold">Cantidad:</label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  {...form.register("quantity", { valueAsNumber: true })}
+                  className="w-20"
+                />
+                {form.formState.errors.quantity && (
+                  <p className="text-sm font-medium text-destructive text-[var(--color-error)]">
+                    {(() => {
+                      const raw = String(form.formState.errors.quantity?.message || '');
+                      const lower = raw.toLowerCase();
+                      return (lower.includes('invalid input') || lower.includes('expected number') || lower.includes('nan'))
+                        ? 'Ingrese un valor'
+                        : raw;
+                    })()}
+                  </p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                variant="default"
+                size="lg"
+                className="w-full font-extrabold mt-4"
+              >
+                <ShoppingCart size={24} className="mr-3" />
+                Añadir al Carrito
+              </Button>
+            </form>
             
           </div>
         </div>

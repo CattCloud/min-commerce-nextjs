@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css"; 
 
-import { CartProvider } from "@/app/context/cart/CartProvider";
 import Header from "@/app/components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -20,15 +19,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        {/* Envolvemos toda la app con el CartProvider */}
-        <CartProvider>
-          {/* El Header se mostrará en todas las páginas */}
-          <Header />
-          {/* Aquí se renderizará el contenido de cada página (page.tsx) */}
-          <main className="bg-white min-h-screen px-4">
-            {children}
-          </main>
-        </CartProvider>
+        {/* El Header se mostrará en todas las páginas */}
+        <Header />
+        {/* Aquí se renderizará el contenido de cada página (page.tsx) */}
+        <main className="bg-bg-body min-h-screen px-4">
+          {children}
+        </main>
       </body>
     </html>
   );

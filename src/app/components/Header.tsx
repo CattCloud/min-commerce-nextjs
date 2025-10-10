@@ -2,11 +2,12 @@
 import { useState, useEffect } from 'react'; // Importa useEffect
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
-import { useCart } from '../context/cart/CartContext';
-import CartDropdown from './CartDropdown'; 
+import { useCartStore } from '../../store/useCartStore';
+import CartDropdown from './CartDropdown';
+import { Button } from '../../components/ui/button';
 
 const Header: React.FC = () => {
-  const { cartCount } = useCart();
+  const { cartCount } = useCartStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   // PASO 1: Crea un estado para saber si el componente ya se montó en el cliente.
@@ -29,28 +30,30 @@ const Header: React.FC = () => {
     <header className="sticky top-0 z-40 bg-bg-app border-b border-border-default shadow-lg">
       <div className="container mx-auto max-w-7xl px-4 py-2 flex justify-between items-center">
         
-        <Link href="/" className="text-text-light hover:text-primary-500 transition-colors">
+        <Link href="/" className="text-text-light hover:text-text-primary transition-colors">
           <h1 className="text-3xl font-extrabold tracking-wider text-primary-300">
             Min-Commerce
           </h1>
         </Link>
 
         <div className="relative">
-          <button 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={toggleDropdown}
-            className="cursor-pointer p-2 text-primary-500 hover:bg-bg-card transition-colors relative"
             aria-expanded={isDropdownOpen}
             aria-controls="cart-dropdown"
+            className="relative"
           >
             <ShoppingCart size={24} />
-            
+
             {/* PASO 3: Solo renderiza la insignia si el componente está montado Y si hay items */}
             {hasMounted && cartCount > 0 && (
-              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-bg-card transform translate-x-1/2 bg-secondary-500 rounded-full">
+              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-[var(--color-bg-app)] transform translate-x-1/2 bg-[var(--color-secondary-500)] rounded-full">
                 {cartCount}
               </span>
             )}
-          </button>
+          </Button>
 
           {hasMounted && isDropdownOpen && (
             <CartDropdown onClose={closeDropdown} />

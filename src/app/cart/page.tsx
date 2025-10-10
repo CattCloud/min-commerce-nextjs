@@ -1,16 +1,17 @@
 "use client";
 import { useMemo } from 'react';
-import { useCart } from '../context/cart/CartContext';
+import { useCartStore } from '../../store/useCartStore';
 import { formatPrice } from '../utils/price';
-import CartItemActions from '../components/CartItemActions'; 
+import CartItemActions from '../components/CartItemActions';
 import { ShoppingCart } from 'lucide-react';
+import { Button } from '../../components/ui/button';
 
 /**
  * Componente de la página del carrito de compras (/cart).
  * Muestra la lista de productos agregados y el resumen de la compra.
  */
 const CartPage: React.FC = () => {
-  const { cartItems } = useCart();
+  const { cartItems } = useCartStore();
 
   // Calcular el total de la compra (incluyendo un impuesto simulado)
   const totals = useMemo(() => {
@@ -66,14 +67,14 @@ const CartPage: React.FC = () => {
               </div>
               
               
-              <button 
-                className="w-full p-3 mt-6 cursor-pointer bg-secondary-500 text-bg-card 
-                           font-bold text-lg hover:bg-secondary-dark transition-colors 
-                           focus:ring-4 focus:ring-secondary-500 focus:ring-opacity-50"
+              <Button
+                variant="secondary"
+                size="lg"
+                className="w-full mt-6 font-bold"
                 onClick={() => alert("¡Proceso de pago simulado!")}
               >
                 Proceder al Pago
-              </button>
+              </Button>
             </div>
           </div>
         </div>

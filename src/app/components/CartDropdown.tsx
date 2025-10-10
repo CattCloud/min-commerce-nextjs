@@ -1,7 +1,7 @@
 "use client"
 import Link from 'next/link';
 import { Trash2, X } from 'lucide-react';
-import { useCart } from '../context/cart/CartContext';
+import { useCartStore } from '../../store/useCartStore';
 import { formatPrice } from '../utils/price';
 
 interface CartDropdownProps {
@@ -10,7 +10,7 @@ interface CartDropdownProps {
 
 
 const CartDropdown: React.FC<CartDropdownProps> = ({ onClose }) => {
-  const { cartItems, clearCart } = useCart();
+  const { cartItems, clearCart } = useCartStore();
 
   
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);

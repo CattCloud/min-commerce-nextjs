@@ -1,6 +1,6 @@
 "use client"
 import { Trash2 } from 'lucide-react';
-import { useCart } from '../context/cart/CartContext';
+import { useCartStore } from '../../store/useCartStore';
 import type { CartItem } from '../models/cart';
 import QuantitySelector from './QuantitySelector';
 import { formatPrice } from '../utils/price';
@@ -15,7 +15,7 @@ interface CartItemActionsProps {
  * usando el Contexto del Carrito para las acciones.
  */
 const CartItemActions: React.FC<CartItemActionsProps> = ({ item }) => {
-  const { updateQuantity, removeFromCart } = useCart();
+  const { updateQuantity, removeFromCart } = useCartStore();
 
   const handleUpdateQuantity = (newQuantity: number) => {
     // Si la nueva cantidad es 0, la lógica de updateQuantity en el context
