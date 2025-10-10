@@ -1,8 +1,9 @@
-import ProductList from '../app/components/ProductList';
-import { products } from '../app/data/products'; 
+import ProductList from '../components/ProductList';
+import { products } from '../data/products'; 
 
-export default function Home() {
- return (
+
+const HomePage: React.FC = () => {
+  return (
     <div className="pt-4">
       <h2 className="text-xl font-extrabold text-text-inverse text-start px-4">
         Catálogo de Productos
@@ -10,5 +11,6 @@ export default function Home() {
       <ProductList products={products} />
     </div>
   );
-}
+};
 
+export default HomePage;
