@@ -16,21 +16,31 @@ const CART_STORAGE_KEY = 'min-commerce.cart';
 
 export const useCartStore = create<CartStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       cartItems: [],
       cartCount: 0,
 
       addToCart: (product: Product, quantity: number = 1) => {
         set((state) => {
-          const existingItem = state.cartItems.find(item => item.id === product.id);
-          let newCartItems: CartItem[];
+          // Normalizar el id a string para evitar duplicados entre '3' y 3
+          const normalizedId = `${product.id}`;
+          const normalizedProduct = { ...product, id: normalizedId };
 
+          // Asegurar que los items existentes tengan id string
+          const normalizedCart = state.cartItems.map((it) => ({
+            ...it,
+            id: `${it.id}`,
+          }));
+
+          const existingItem = normalizedCart.find((item) => item.id === normalizedId);
+
+          let newCartItems: CartItem[];
           if (existingItem) {
-            newCartItems = state.cartItems.map(item =>
-              item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+            newCartItems = normalizedCart.map((item) =>
+              item.id === normalizedId ? { ...item, quantity: item.quantity + quantity } : item
             );
           } else {
-            newCartItems = [...state.cartItems, { ...product, quantity }];
+            newCartItems = [...normalizedCart, { ...normalizedProduct, quantity }];
           }
 
           const newCartCount = newCartItems.reduce((total, item) => total + item.quantity, 0);
@@ -44,7 +54,10 @@ export const useCartStore = create<CartStore>()(
 
       removeFromCart: (productId: string) => {
         set((state) => {
-          const newCartItems = state.cartItems.filter(item => item.id !== productId);
+          const newCartItems = state.cartItems
+            .map((it) => ({ ...it, id: `${it.id}` }))
+            .filter((item) => item.id !== `${productId}`);
+
           const newCartCount = newCartItems.reduce((total, item) => total + item.quantity, 0);
 
           return {
@@ -56,13 +69,17 @@ export const useCartStore = create<CartStore>()(
 
       updateQuantity: (productId: string, quantity: number) => {
         set((state) => {
+          const normalizedId = String(productId);
+
           let newCartItems: CartItem[];
+          // Normalizar ids a string
+          const cart = state.cartItems.map((it) => ({ ...it, id: `${it.id}` }));
 
           if (quantity <= 0) {
-            newCartItems = state.cartItems.filter(item => item.id !== productId);
+            newCartItems = cart.filter((item) => item.id !== normalizedId);
           } else {
-            newCartItems = state.cartItems.map(item =>
-              item.id === productId ? { ...item, quantity } : item
+            newCartItems = cart.map((item) =>
+              item.id === normalizedId ? { ...item, quantity } : item
             );
           }
 

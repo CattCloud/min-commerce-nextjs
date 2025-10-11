@@ -1,22 +1,31 @@
-import { useState } from 'react';
-import { redirect } from 'next/navigation';
-import { useParams } from 'next/navigation'; // Hook de Next.js para leer parámetros
+"use client";
+
+import "notyf/notyf.min.css";
+import { getNotyf } from "../../lib/notyf";
+import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
-import { products } from '../data/products';
 import { formatPrice } from '../utils/price';
 import { useCartStore } from '../../store/useCartStore';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { quantitySchema, QuantityFormData } from '../../schemas/cart';
 
+interface ProductDetailPageProps {
+  product: {
+    id: number;
+    name: string;
+    price: number;
+    imageUrl: string;
+    category: string;
+    description: string;
+    stock: number;
+  };
+}
 
-const ProductDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product }) => {
   const { addToCart } = useCartStore();
-  const [showNotification, setShowNotification] = useState(false);
 
   const form = useForm<QuantityFormData>({
     resolver: zodResolver(quantitySchema),
@@ -25,19 +34,12 @@ const ProductDetailPage: React.FC = () => {
     },
   });
 
-  // Buscar el producto por ID
-  const product = products.find(p => p.id === id);
-
-  // Si el producto no se encuentra, redirigimos al inicio
-  if (!product) {
-    redirect('/');
-  }
-
   // Manejador para añadir al carrito
   const handleAddToCart = (data: QuantityFormData) => {
-    addToCart(product, data.quantity);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000); // Ocultar notificacin despus de 3s
+    addToCart({ ...product, id: product.id.toString() }, data.quantity);
+    try {
+      getNotyf().success(`${product.name} ha sido añadido al carrito`);
+    } catch {}
   };
 
   return (
@@ -46,11 +48,13 @@ const ProductDetailPage: React.FC = () => {
         <div className="grid md:grid-cols-2 gap-12 items-start">
           
         
-          <div className="flex justify-center items-center p-4 bg-bg-app">
-            <img
+          <div className="flex justify-center items-center p-4 bg-bg-app relative h-[450px]">
+            <Image
               src={product.imageUrl}
               alt={product.name}
-              className="w-full max-h-[450px] object-contain rounded-lg"
+              fill
+              className="object-contain rounded-lg"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
 
@@ -60,7 +64,6 @@ const ProductDetailPage: React.FC = () => {
             
             <p className="text-2xl font-bold text-primary-500">
               {formatPrice(product.price)}
-              {product.onSale && <span className="ml-4 text-secondary-500 font-semibold"> (En Oferta)</span>}
             </p>
 
             <p className="text-text-secondary leading-relaxed">
@@ -111,10 +114,6 @@ const ProductDetailPage: React.FC = () => {
         </div>
       </div>
       
-      {/* Notificacin de exito */}
-      {showNotification && (
-        <div className="fixed bottom-10 right-10 bg-secondary-500 text-bg-card px-6 py-3 font-bold shadow-lg transition-opacity duration-500 z-50">{product.name} ha sido añadido al carrito</div>
-      )}
     </div>
   );
 };

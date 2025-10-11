@@ -1,6 +1,8 @@
 "use client"
-import { useState } from 'react';
+import "notyf/notyf.min.css";
+import { getNotyf } from '../../lib/notyf';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Product } from '../models/products';
 import { ShoppingCart, Heart } from 'lucide-react';
 import ProductTag from './ProductTag';
@@ -15,7 +17,6 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
-  const [showNotification, setShowNotification] = useState(false);
   const { addToCart } = useCartStore();
   const productUrl = `/product/${product.id}`;
 
@@ -37,8 +38,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Manejador para añadir al carrito
   const handleAddToCart = () => {
     addToCart(product, 1);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000); // Ocultar notificacin despus de 3s
+    try {
+      getNotyf().success(`${product.name} ha sido añadido al carrito.`);
+    } catch {}
   };
 
   return (
@@ -55,14 +57,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       <CardContent className="p-4">
         <Link href={productUrl} className="flex flex-col flex-grow min-h-0">
-          <div className="flex justify-center items-center h-56 mb-4">
-            <img
+          <div className="flex justify-center items-center h-56 mb-4 relative">
+            <Image
               src={product.imageUrl}
               alt={product.name}
-              className="w-full h-full object-contain rounded-md transform hover:scale-[1.03] transition-transform duration-500"
-              onError={(e) => {
-                e.currentTarget.src = 'https://placehold.co/300x200/1A1A1A/757575?text=Image+Missing';
-              }}
+              fill
+              className="object-contain rounded-md transform hover:scale-[1.03] transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
 
@@ -88,12 +89,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </Button>
       </CardFooter>
 
-      {/* Notificacin de exito */}
-      {showNotification && (
-        <div className="fixed bottom-10 right-10 bg-secondary-500 text-bg-card px-6 py-3 font-bold shadow-lg transition-opacity duration-500 z-50">
-          {product.name} ha sido añadido al carrito.
-        </div>
-      )}
     </Card>
   );
 };

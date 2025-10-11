@@ -1,4 +1,5 @@
 "use client"
+import Image from 'next/image';
 import { Trash2 } from 'lucide-react';
 import { useCartStore } from '../../store/useCartStore';
 import type { CartItem } from '../models/cart';
@@ -33,10 +34,12 @@ const CartItemActions: React.FC<CartItemActionsProps> = ({ item }) => {
       
       {/* 1. Imagen y Nombre del Producto */}
       <div className="flex items-center flex-grow space-x-4 min-w-0">
-        <img
+        <Image
           src={item.imageUrl}
           alt={item.name}
-          className="w-16 h-16 object-cover  flex-shrink-0"
+          width={64}
+          height={64}
+          className="object-cover flex-shrink-0"
         />
         <div className="min-w-0">
           <p className="text-lg font-bold text-text-primary truncate">{item.name}</p>

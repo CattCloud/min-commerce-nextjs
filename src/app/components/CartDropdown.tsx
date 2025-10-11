@@ -1,5 +1,6 @@
 "use client"
 import Link from 'next/link';
+import Image from 'next/image';
 import { Trash2, X } from 'lucide-react';
 import { useCartStore } from '../../store/useCartStore';
 import { formatPrice } from '../utils/price';
@@ -37,9 +38,9 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ onClose }) => {
         <>
           
           <div className="max-h-60 overflow-y-auto divide-y divide-border-default">
-            {cartItems.slice(0, 3).map(item => ( // Mostrar un máximo de 3 items en el resumen
-              <div key={item.id} className="p-3 flex items-center space-x-3 hover:bg-bg-hover transition-colors">
-                <img src={item.imageUrl} alt={item.name} className="w-12 h-12 object-cover" />
+            {cartItems.slice(0, 3).map((item, index) => ( // Mostrar un máximo de 3 items en el resumen
+              <div key={index} className="p-3 flex items-center space-x-3 hover:bg-bg-hover transition-colors">
+                <Image src={item.imageUrl} alt={item.name} width={48} height={48} className="object-cover" />
                 <div className="flex-1 min-w-0">
                   <p className="text-text-primary text-sm font-semibold truncate">{item.name}</p>
                   <p className="text-text-secondary text-xs">

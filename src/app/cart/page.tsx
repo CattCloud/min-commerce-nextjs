@@ -1,5 +1,6 @@
 "use client";
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../store/useCartStore';
 import { formatPrice } from '../utils/price';
 import CartItemActions from '../components/CartItemActions';
@@ -12,6 +13,7 @@ import { Button } from '../../components/ui/button';
  */
 const CartPage: React.FC = () => {
   const { cartItems } = useCartStore();
+  const router = useRouter();
 
   // Calcular el total de la compra (incluyendo un impuesto simulado)
   const totals = useMemo(() => {
@@ -71,7 +73,7 @@ const CartPage: React.FC = () => {
                 variant="secondary"
                 size="lg"
                 className="w-full mt-6 font-bold"
-                onClick={() => alert("¡Proceso de pago simulado!")}
+                onClick={() => router.push('/checkout')}
               >
                 Proceder al Pago
               </Button>
