@@ -22,20 +22,32 @@ interface Order {
 }
 
 export default async function OrdersPage() {
-  const res = await fetch('/api/orders', {
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+  
+  const apiUrl = `${BASE_URL}/api/orders`; 
+  
+  if (!BASE_URL) {
+      console.error("NEXT_PUBLIC_BASE_URL no está definida. La llamada fetch fallará.");
+  }
+
+  const res = await fetch(apiUrl, { 
     cache: 'no-store',
   });
 
   if (!res.ok) {
+    const errorBody = await res.text();
+    console.error("Error al cargar órdenes (API Response):", res.status, errorBody);
+    
     return (
       <div className="container mx-auto px-4 pt-4">
         <h1 className="text-2xl font-bold mb-4">Historial de Órdenes</h1>
-        <p>Error al cargar las órdenes.</p>
+        <p>Error al cargar las órdenes. (Status: {res.status})</p>
       </div>
     );
   }
 
-  const orders = await res.json();
+  const orders: Order[] = await res.json(); 
+
 
   return (
     <div className="container mx-auto px-4 pt-4">

@@ -34,9 +34,14 @@ const CheckoutPage: React.FC = () => {
     }
 
     setIsSubmitting(true);
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+    const apiUrl = `${BASE_URL}/api/orders`;
 
+    if (!BASE_URL) {
+      console.error("BASE_URL no está configurada, usando ruta relativa.");
+    }
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch(apiUrl, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,14 +52,13 @@ const CheckoutPage: React.FC = () => {
           customerEmail: data.customerEmail,
         }),
       });
-
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Error al procesar la orden');
       }
 
       await response.json();
-      try { sessionStorage.setItem('order-success', '1'); } catch {}
+      try { sessionStorage.setItem('order-success', '1'); } catch { }
       router.push('/orders');
       return;
     } catch (error) {
@@ -79,7 +83,7 @@ const CheckoutPage: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">Pago del pedido</h1>
 
       <div className="grid md:grid-cols-2 gap-8">
-      
+
         {/* Formulario */}
         <div className="bg-bg-card p-6 rounded-lg border border-border-default text-text-primary">
           <Form {...form}>
@@ -118,7 +122,7 @@ const CheckoutPage: React.FC = () => {
             </form>
           </Form>
         </div>
-         {/* Resumen del Pedido */}
+        {/* Resumen del Pedido */}
         <div className="bg-bg-card p-6 rounded-lg border text-white border-border-default">
           <h2 className="text-xl font-semibold mb-4">Resumen del Pedido</h2>
           <div className="space-y-2 text-text-secondary">
