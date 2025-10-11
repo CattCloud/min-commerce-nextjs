@@ -10,15 +10,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
 
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-  
-  if (!BASE_URL) {
-      throw new Error("NEXT_PUBLIC_BASE_URL no está configurada.");
-  }
-  
-  const apiUrl = `${BASE_URL}/api/products/${id}`; 
 
-  const res = await fetch(apiUrl, { 
-    cache: 'no-store',
+  if (!BASE_URL) {
+    throw new Error("NEXT_PUBLIC_BASE_URL no está configurada.");
+  }
+
+  const apiUrl = `${BASE_URL}/api/products/${id}`;
+
+  const res = await fetch(apiUrl, {
+    next: {
+      revalidate: 3600
+    }
   });
 
   if (!res.ok) {

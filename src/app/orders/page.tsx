@@ -31,7 +31,9 @@ export default async function OrdersPage() {
   }
 
   const res = await fetch(apiUrl, { 
-    cache: 'no-store',
+    next: { 
+    revalidate: 3600
+} 
   });
 
   if (!res.ok) {
