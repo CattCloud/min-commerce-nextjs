@@ -13,7 +13,7 @@ import { checkoutSchema, CheckoutFormData } from '../../schemas/cart';
 import { formatPrice } from '../utils/price';
 
 const CheckoutPage: React.FC = () => {
-  const { cartItems, clearCart } = useCartStore();
+  const { cartItems } = useCartStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 

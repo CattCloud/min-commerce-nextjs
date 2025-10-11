@@ -1,13 +1,13 @@
 import ProductDetailPage from "../../pages/ProductDetailPage";
 
 interface ProductPageProps {
-  params: {
-    id: string; 
-  };
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { id } = params; 
+  const { id } = await params;
 
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
   
