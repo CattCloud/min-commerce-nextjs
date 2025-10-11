@@ -34,14 +34,10 @@ const CheckoutPage: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-    const apiUrl = `${BASE_URL}/api/orders`;
+    const apiUrl = '/api/orders';
 
-    if (!BASE_URL) {
-      console.error("BASE_URL no está configurada, usando ruta relativa.");
-    }
     try {
-      const response = await fetch(apiUrl, { 
+      const response = await fetch(apiUrl, { // <-- USAMOS LA RUTA RELATIVA
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,6 +48,7 @@ const CheckoutPage: React.FC = () => {
           customerEmail: data.customerEmail,
         }),
       });
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Error al procesar la orden');
