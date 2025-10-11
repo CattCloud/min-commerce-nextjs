@@ -156,6 +156,10 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "rhel-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -163,7 +167,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
@@ -182,8 +186,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Product {\n  id          Int         @id @default(autoincrement())\n  name        String\n  description String\n  price       Float\n  imageUrl    String\n  category    String\n  stock       Int         @default(100)\n  orderItems  OrderItem[]\n}\n\nmodel Order {\n  id            Int         @id @default(autoincrement())\n  total         Float\n  createdAt     DateTime    @default(now())\n  orderItems    OrderItem[]\n  customerName  String\n  customerEmail String\n}\n\nmodel OrderItem {\n  id        Int     @id @default(autoincrement())\n  quantity  Int\n  order     Order   @relation(fields: [orderId], references: [id])\n  orderId   Int\n  product   Product @relation(fields: [productId], references: [id])\n  productId Int\n}\n",
-  "inlineSchemaHash": "d8140e8990e5b2a53cd94d771bdeda6273279d042de009bce65c5049b4d196be",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../generated/prisma\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Product {\n  id          Int         @id @default(autoincrement())\n  name        String\n  description String\n  price       Float\n  imageUrl    String\n  category    String\n  stock       Int         @default(100)\n  orderItems  OrderItem[]\n}\n\nmodel Order {\n  id            Int         @id @default(autoincrement())\n  total         Float\n  createdAt     DateTime    @default(now())\n  orderItems    OrderItem[]\n  customerName  String\n  customerEmail String\n}\n\nmodel OrderItem {\n  id        Int     @id @default(autoincrement())\n  quantity  Int\n  order     Order   @relation(fields: [orderId], references: [id])\n  orderId   Int\n  product   Product @relation(fields: [productId], references: [id])\n  productId Int\n}\n",
+  "inlineSchemaHash": "c29c11d9a459917f063e7dc9cee46cdb2478cbac7d1f32cd8aec536fbc516d8d",
   "copyEngine": true
 }
 
@@ -224,6 +228,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "generated/prisma/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-rhel-openssl-3.0.x.so.node");
+path.join(process.cwd(), "generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "generated/prisma/schema.prisma")
