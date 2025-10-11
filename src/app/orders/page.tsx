@@ -21,6 +21,7 @@ interface Order {
   orderItems: OrderItem[];
 }
 
+
 export default async function OrdersPage() {
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
   
