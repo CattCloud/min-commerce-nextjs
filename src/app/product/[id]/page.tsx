@@ -3,9 +3,10 @@ import ProductDetailPage from "../../pages/ProductDetailPage";
 export default async function ProductPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const res = await fetch(`http://localhost:3000/api/products/${params.id}`, {
+  const { id } = await params;
+  const res = await fetch(`http://localhost:3000/api/products/${id}`, {
     cache: 'no-store',
   });
 
