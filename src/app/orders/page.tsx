@@ -22,7 +22,7 @@ interface Order {
 }
 
 export default async function OrdersPage() {
-  const res = await fetch('http://localhost:3000/api/orders', {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/orders`, {
     cache: 'no-store',
   });
 
