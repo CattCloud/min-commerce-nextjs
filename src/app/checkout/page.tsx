@@ -37,7 +37,7 @@ const CheckoutPage: React.FC = () => {
     const apiUrl = '/api/orders';
 
     try {
-      const response = await fetch(apiUrl, { // <-- USAMOS LA RUTA RELATIVA
+      const response = await fetch(apiUrl, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

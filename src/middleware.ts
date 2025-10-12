@@ -7,7 +7,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Para otras rutas, continuar normalmente
   return NextResponse.next();
 }
 
