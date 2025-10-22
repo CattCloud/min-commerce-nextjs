@@ -54,9 +54,18 @@ const CheckoutPage: React.FC = () => {
         throw new Error(error.error || 'Error al procesar la orden');
       }
 
-      await response.json();
-      try { sessionStorage.setItem('order-success', '1'); } catch { }
-      router.push('/orders');
+      const orderData = await response.json();
+      console.log('Orden creada:', orderData); // Debug log
+      
+      try {
+        sessionStorage.setItem('order-success', '1');
+        sessionStorage.setItem('last-order-id', orderData.id.toString());
+      } catch { }
+      
+      // Pequeña demora para asegurar que la base de datos complete la transacción
+      setTimeout(() => {
+        router.push('/orders');
+      }, 300);
       return;
     } catch (error) {
       console.error('Error:', error);

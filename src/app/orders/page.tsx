@@ -31,10 +31,10 @@ export default async function OrdersPage() {
       console.error("NEXT_PUBLIC_BASE_URL no está definida. La llamada fetch fallará.");
   }
 
-  const res = await fetch(apiUrl, { 
-    next: { 
-    revalidate: 3600
-} 
+  const res = await fetch(apiUrl, {
+    next: {
+    revalidate: 0
+}
   });
 
   if (!res.ok) {
