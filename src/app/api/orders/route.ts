@@ -28,7 +28,35 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { items, customerName, customerEmail } = await request.json();
+    const { items, customerName, customerEmail, userId } = await request.json();
+    
+    // Asegurar que el usuario exista en la base de datos si se proporciona userId
+    if (userId) {
+      // Primero buscar por email, luego por id
+      let user = await prisma.user.findUnique({
+        where: { email: customerEmail }
+      })
+      
+      if (!user) {
+        // Si no existe por email, crearlo
+        user = await prisma.user.create({
+          data: {
+            id: userId,
+            email: customerEmail,
+            name: customerName,
+            image: ''
+          }
+        })
+      } else if (user.id !== userId) {
+        // Si existe pero con id diferente, actualizar el id
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { id: userId }
+        })
+      }
+      
+      console.log('API Orders POST: user processed', { userId: user.id, email: user.email })
+    }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'No items provided' }, { status: 400 });
@@ -70,6 +98,7 @@ export async function POST(request: Request) {
           total,
           customerName,
           customerEmail,
+          userId: userId || null, // Asociar con usuario si está disponible
           orderItems: {
             create: orderItems,
           },

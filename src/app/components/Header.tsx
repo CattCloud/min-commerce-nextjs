@@ -3,12 +3,15 @@ import { useState, useEffect } from 'react'; // Importa useEffect
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
 import { useCartStore } from '../../store/useCartStore';
+import { useSession } from 'next-auth/react';
 import CartDropdown from './CartDropdown';
 import { Button } from '../../components/ui/button';
+import AuthButton from '../../components/AuthButton';
 
 const Header: React.FC = () => {
   const { cartCount } = useCartStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { data: session } = useSession();
   
   // PASO 1: Crea un estado para saber si el componente ya se montó en el cliente.
   const [hasMounted, setHasMounted] = useState(false);
@@ -36,27 +39,35 @@ const Header: React.FC = () => {
           </h1>
         </Link>
 
-        <div className="relative">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleDropdown}
-            aria-expanded={isDropdownOpen}
-            aria-controls="cart-dropdown"
-            className="relative"
-          >
-            <ShoppingCart size={24} />
+        <div className="flex items-center space-x-4">
+          {/* AuthButton - Primero para que esté a la izquierda del carrito */}
+          <AuthButton />
+          
+          {/* Carrito - Solo para usuarios autenticados */}
+          {session && (
+            <div className="relative">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleDropdown}
+                aria-expanded={isDropdownOpen}
+                aria-controls="cart-dropdown"
+                className="relative"
+              >
+                <ShoppingCart size={24} />
 
-            {/* PASO 3: Solo renderiza la insignia si el componente está montado Y si hay items */}
-            {hasMounted && cartCount > 0 && (
-              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-[var(--color-bg-app)] transform translate-x-1/2 bg-[var(--color-secondary-500)] rounded-full">
-                {cartCount}
-              </span>
-            )}
-          </Button>
+                {/* PASO 3: Solo renderiza la insignia si el componente está montado Y si hay items */}
+                {hasMounted && cartCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-[var(--color-bg-app)] transform translate-x-1/2 bg-[var(--color-secondary-500)] rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </Button>
 
-          {hasMounted && isDropdownOpen && (
-            <CartDropdown onClose={closeDropdown} />
+              {hasMounted && isDropdownOpen && (
+                <CartDropdown onClose={closeDropdown} />
+              )}
+            </div>
           )}
         </div>
         

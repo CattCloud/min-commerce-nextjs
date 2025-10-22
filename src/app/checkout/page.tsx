@@ -1,154 +1,157 @@
-"use client";
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useCartStore } from '../../store/useCartStore';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { checkoutSchema, CheckoutFormData } from '../../schemas/cart';
-import { formatPrice } from '../utils/price';
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import CheckoutForm from "@/components/CheckoutForm"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { useCartStore } from "@/store/useCartStore"
+import { formatPrice } from "@/app/utils/price"
+import Link from "next/link"
+import { ShoppingBag, User, Mail } from "lucide-react"
+import { useEffect } from "react"
 
-const CheckoutPage: React.FC = () => {
-  const { cartItems } = useCartStore();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
+interface CartItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+}
 
-  const form = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: {
-      customerName: '',
-      customerEmail: '',
-    },
-  });
-
-  const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-  const handleSubmit = async (data: CheckoutFormData) => {
-    if (cartItems.length === 0) {
-      alert('El carrito está vacío');
-      return;
+export default function CheckoutPage() {
+  const { data: session } = useSession()
+  const router = useRouter()
+  const { cartItems, loadCartFromDB } = useCartStore()
+  
+  // Si no hay sesión, redirigir a login
+  useEffect(() => {
+    if (!session) {
+      router.push("/api/auth/signin?callbackUrl=/checkout")
     }
-
-    setIsSubmitting(true);
-    const apiUrl = '/api/orders';
-
-    try {
-      const response = await fetch(apiUrl, { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: cartItems.map(item => ({ id: parseInt(item.id), quantity: item.quantity })),
-          customerName: data.customerName,
-          customerEmail: data.customerEmail,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al procesar la orden');
-      }
-
-      const orderData = await response.json();
-      console.log('Orden creada:', orderData); // Debug log
-      
-      try {
-        sessionStorage.setItem('order-success', '1');
-        sessionStorage.setItem('last-order-id', orderData.id.toString());
-      } catch { }
-      
-      // Pequeña demora para asegurar que la base de datos complete la transacción
-      setTimeout(() => {
-        router.push('/orders');
-      }, 300);
-      return;
-    } catch (error) {
-      console.error('Error:', error);
-      alert(error instanceof Error ? error.message : 'Error desconocido');
-    } finally {
-      setIsSubmitting(false);
+  }, [session, router])
+  
+  // Cargar carrito al montar
+  useEffect(() => {
+    if (session?.user?.id) {
+      loadCartFromDB()
     }
-  };
+  }, [session?.user?.id, loadCartFromDB])
+  
+  const total = cartItems.reduce((sum, item: CartItem) => sum + (item.price * item.quantity), 0);
+
+  // Mostrar loading mientras no hay sesión o no hay carrito cargado
+  if (!session) {
+    return (
+      <div className="container mx-auto px-4 pt-4">
+        <div className="max-w-md mx-auto text-center">
+          <Card className="bg-bg-card p-8">
+            <CardHeader>
+              <CardTitle className="text-xl text-text-primary">
+                Cargando...
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-text-secondary">
+                Redirigiendo al login...
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   if (cartItems.length === 0) {
     return (
       <div className="container mx-auto px-4 pt-4">
-        <h1 className="text-2xl font-bold mb-4">Pago del pedido</h1>
-        <p>Tu carrito está vacío. <Link href="/" className="text-primary-500">Volver al catálogo</Link></p>
+        <div className="max-w-md mx-auto text-center">
+          <Card className="bg-bg-card p-8">
+            <CardHeader>
+              <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <ShoppingBag className="w-8 h-8 text-gray-400" />
+              </div>
+              <CardTitle className="text-xl text-text-primary">
+                Carrito Vacío
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-text-secondary mb-6">
+                Tu carrito está vacío. Agrega algunos productos antes de continuar.
+              </p>
+              <Link href="/">
+                <Button className="w-full">
+                  Volver al Catálogo
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="container mx-auto px-4 pt-4 ">
-      <h1 className="text-2xl font-bold mb-4">Pago del pedido</h1>
+    <div className="container mx-auto px-4 pt-4">
+      <h1 className="text-2xl font-bold mb-2">Pago del Producto</h1>
 
-      <div className="grid md:grid-cols-2 gap-8">
 
-        {/* Formulario */}
-        <div className="bg-bg-card p-6 rounded-lg border border-border-default text-text-primary">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="customerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre Completo</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Juan Pérez" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+      <div className="grid md:grid-cols-3 gap-8">
+        {/* Formulario - 2 columnas */}
+        <div className="md:col-span-2">
+          <Card className="bg-bg-card p-6">
+            <CardHeader>
+              <CardTitle className="flex items-center text-primary-500">
+                <User className="w-5 h-5 mr-2"/>
+                Información de Envío
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CheckoutForm
+                userName={session?.user?.name || ""}
+                userEmail={session?.user?.email || ""}
+                userId={session?.user?.id || ""}
+                cartItems={cartItems}
+                total={total}
               />
-
-              <FormField
-                control={form.control}
-                name="customerEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="juan@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? 'Procesando...' : 'Completar Compra'}
-              </Button>
-            </form>
-          </Form>
+            </CardContent>
+          </Card>
         </div>
-        {/* Resumen del Pedido */}
-        <div className="bg-bg-card p-6 rounded-lg border text-white border-border-default">
-          <h2 className="text-xl font-semibold mb-4">Resumen del Pedido</h2>
-          <div className="space-y-2 text-text-secondary">
-            {cartItems.map(item => (
-              <div key={item.id} className="flex justify-between">
-                <span>{item.name} x {item.quantity}</span>
-                <span>{formatPrice(item.price * item.quantity)}</span>
+        
+        {/* Resumen - 1 columna */}
+        <div className="md:col-span-1">
+          <Card className="bg-bg-card p-6 sticky top-24">
+            <CardHeader>
+              <CardTitle className="flex items-center text-primary-500">
+                <ShoppingBag className="w-5 h-5 mr-2" />
+                Resumen del Pedido
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {cartItems.map((item: CartItem) => (
+                  <div key={item.id} className="flex justify-between items-center py-2 border-b border-border-default last:border-0">
+                    <div className="flex-1">
+                      <p className="font-medium text-text-primary">{item.name}</p>
+                      <p className="text-sm text-text-secondary">Cantidad: {item.quantity}</p>
+                    </div>
+                    <span className="font-medium text-text-primary">
+                      {formatPrice(item.price * item.quantity)}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-            <hr className="border-border-default" />
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total:</span>
-              <span>{formatPrice(total)}</span>
-            </div>
-          </div>
+              
+              <div className="mt-6 pt-4 border-t border-border-default">
+                <div className="flex justify-between items-center text-primary-500 text-lg font-bold">
+                  <span>Total:</span>
+                  <span>{formatPrice(total)}</span>
+                </div>
+              </div>
+              
+            </CardContent>
+          </Card>
         </div>
       </div>
-
     </div>
-  );
-};
-
-export default CheckoutPage;
+  )
+}

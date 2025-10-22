@@ -3,9 +3,11 @@
 import "notyf/notyf.min.css";
 import { getNotyf } from "../../lib/notyf";
 import Image from 'next/image';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, LogIn } from 'lucide-react';
 import { formatPrice } from '../utils/price';
 import { useCartStore } from '../../store/useCartStore';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { useForm } from 'react-hook-form';
@@ -26,6 +28,8 @@ interface ProductDetailPageProps {
 
 const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product }) => {
   const { addToCart } = useCartStore();
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const form = useForm<QuantityFormData>({
     resolver: zodResolver(quantitySchema),
@@ -35,8 +39,15 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product }) => {
   });
 
   // Manejador para añadir al carrito
-  const handleAddToCart = (data: QuantityFormData) => {
-    addToCart({ ...product, id: product.id.toString() }, data.quantity);
+  const handleAddToCart = async (data: QuantityFormData) => {
+    if (!session) {
+      // Redirigir a login con callback URL
+      router.push('/api/auth/signin?callbackUrl=/product/' + product.id);
+      return
+    }
+
+    // Usuario autenticado - agregar al carrito
+    await addToCart({ ...product, id: product.id.toString() }, data.quantity);
     try {
       getNotyf().success(`${product.name} ha sido añadido al carrito`);
     } catch {}
@@ -105,8 +116,17 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product }) => {
                 size="lg"
                 className="w-full font-extrabold mt-4"
               >
-                <ShoppingCart size={24} className="mr-3" />
-                Añadir al Carrito
+                {session ? (
+                  <>
+                    <ShoppingCart size={24} className="mr-3" />
+                    Añadir al Carrito
+                  </>
+                ) : (
+                  <>
+                    <LogIn size={24} className="mr-3" />
+                    Inicia sesión para Comprar
+                  </>
+                )}
               </Button>
             </form>
             

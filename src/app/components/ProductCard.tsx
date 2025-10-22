@@ -10,6 +10,7 @@ import { formatPrice } from '../utils/price';
 import { useCartStore } from '../../store/useCartStore';
 import { Card, CardContent, CardFooter } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
+import BuyButton from '@/components/BuyButton';
 
 interface ProductCardProps {
   product: Product;
@@ -35,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const shadowClass = 'shadow-xl shadow-bg-app/50';
 
-  // Manejador para añadir al carrito
+  // Manejador para añadir al carrito (solo se usa para el notyf)
   const handleAddToCart = () => {
     addToCart(product, 1);
     try {
@@ -83,10 +84,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {formatPrice(product.price)}
         </p>
 
-        <Button onClick={() => handleAddToCart()} variant="default" size="default">
-          <ShoppingCart size={20} className="mr-2" />
-          Comprar
-        </Button>
+        <BuyButton
+          product={product}
+        />
       </CardFooter>
 
     </Card>

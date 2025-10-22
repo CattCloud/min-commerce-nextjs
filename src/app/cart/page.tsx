@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../store/useCartStore';
 import { formatPrice } from '../utils/price';
@@ -12,8 +12,16 @@ import { Button } from '../../components/ui/button';
  * Muestra la lista de productos agregados y el resumen de la compra.
  */
 const CartPage: React.FC = () => {
-  const { cartItems } = useCartStore();
+  const { cartItems, loadCartFromDB } = useCartStore();
   const router = useRouter();
+
+  // Forzar carga del carrito al montar la página
+  React.useEffect(() => {
+    console.log('CartPage: mounted, loading cart from DB')
+    loadCartFromDB()
+  }, [loadCartFromDB])
+
+  console.log('CartPage: render with cartItems', { count: cartItems.length, items: cartItems })
 
   // Calcular el total de la compra (incluyendo un impuesto simulado)
   const totals = useMemo(() => {

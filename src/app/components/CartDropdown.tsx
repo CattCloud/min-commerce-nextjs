@@ -1,17 +1,17 @@
 "use client"
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Trash2, X } from 'lucide-react';
 import { useCartStore } from '../../store/useCartStore';
 import { formatPrice } from '../utils/price';
-
 interface CartDropdownProps {
   onClose: () => void;
 }
 
 
 const CartDropdown: React.FC<CartDropdownProps> = ({ onClose }) => {
-  const { cartItems, clearCart } = useCartStore();
+  const { cartItems, clearCart, isLoading } = useCartStore();
 
   
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -30,7 +30,14 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ onClose }) => {
         </button>
       </div>
 
-      {cartItems.length === 0 ? (
+      {isLoading ? (
+        <div className="p-6 text-center text-text-secondary">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+            <span className="ml-2">Cargando carrito...</span>
+          </div>
+        </div>
+      ) : cartItems.length === 0 ? (
         <div className="p-6 text-center text-text-secondary">
           Tu carrito está vacío
         </div>
