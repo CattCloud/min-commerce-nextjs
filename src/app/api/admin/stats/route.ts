@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/auth"
+import { getToken } from "next-auth/jwt"
 import { prisma } from "@/lib/prisma"
 
 // Definir interfaces para los tipos de datos
@@ -56,12 +56,42 @@ export async function GET(request: Request) {
   try {
     console.log('API: Iniciando solicitud de estadísticas')
     
-    const session = await auth()
-    console.log('API: Sesión obtenida:', session?.user?.email, 'Role:', session?.user?.role)
+    // Para depuración: imprimir todas las cookies
+    const cookieHeader = request.headers.get('cookie')
+    console.log('API: Cookies recibidas:', cookieHeader)
     
-    // Verificar si el usuario está autenticado y es admin
-    if (!session || session.user?.role !== "admin") {
-      console.log('API: Acceso no autorizado')
+    // Imprimir todos los headers para depuración
+    console.log('API: Todos los headers:', Object.fromEntries(request.headers.entries()))
+    
+    // Verificar si hay cookies de authjs
+    if (cookieHeader) {
+      const hasAuthCookie = cookieHeader.includes('authjs.session-token')
+      console.log('API: ¿Tiene cookie de authjs?', hasAuthCookie)
+      
+      if (hasAuthCookie) {
+        // Extraer el token de la cookie
+        const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+          const [key, value] = cookie.trim().split('=')
+          acc[key] = value
+          return acc
+        }, {} as Record<string, string>)
+        
+        const sessionToken = cookies['authjs.session-token']
+        console.log('API: Token de sesión extraído:', sessionToken ? 'Sí' : 'No')
+      }
+    }
+    
+    // Intentar usar getToken para verificar el JWT directamente
+    console.log('API: Intentando verificar token con getToken')
+    const token = await getToken({ 
+      req: request as any, 
+      secret: process.env.NEXTAUTH_SECRET 
+    })
+    console.log('API: Token obtenido con getToken:', token)
+    
+    // Verificar si el token existe y tiene rol de admin
+    if (!token || token.role !== "admin") {
+      console.log('API: Acceso no autorizado - Token:', token, 'Role:', token?.role)
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 

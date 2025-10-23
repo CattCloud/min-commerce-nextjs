@@ -1,73 +1,166 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
+'use client'
+
+import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { AdminStatsCard } from "@/components/admin/AdminStatsCard"
 import { AdminChart } from "@/components/admin/AdminChart"
 import { RecentOrdersTable } from "@/components/admin/RecentOrdersTable"
 
-// Obtener estadísticas desde la API
-async function getAdminStats() {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    console.log('Fetching stats from:', `${baseUrl}/api/admin/stats`)
-    
-    const response = await fetch(`${baseUrl}/api/admin/stats`, {
-      cache: 'no-store', // No cachear para datos en tiempo real
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    console.log('Response status:', response.status)
-    console.log('Response ok:', response.ok)
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Error response:', errorText)
-      throw new Error(`Error ${response.status}: ${errorText}`)
-    }
-
-    const data = await response.json()
-    console.log('Stats data received:', data)
-    return data
-  } catch (error) {
-    console.error('Error fetching admin stats:', error)
-    // Retornar datos por defecto en caso de error
-    return {
-      totalProducts: 12,
-      totalOrders: 48,
-      totalUsers: 23,
-      totalRevenue: 15420.50,
-      ordersByStatus: [
-        { status: 'pending', count: 8 },
-        { status: 'processing', count: 15 },
-        { status: 'delivered', count: 25 }
-      ],
-      recentOrders: [
-        {
-          id: '1',
-          customerName: 'Juan Pérez',
-          customerEmail: 'juan@example.com',
-          total: 299.99,
-          status: 'delivered',
-          createdAt: new Date().toISOString()
-        }
-      ]
-    }
-  }
+interface Stats {
+  totalProducts: number;
+  totalOrders: number;
+  totalUsers: number;
+  totalRevenue: number;
+  topProducts: Array<{ name: string; totalSold: number }>;
+  dailySales: Array<{ date: string; sales: number }>;
+  recentOrders: Array<{
+    id: string;
+    customerName: string;
+    customerEmail: string;
+    total: number;
+    status: string;
+    createdAt: string;
+  }>;
 }
 
-export default async function AdminDashboardPage() {
-  const session = await auth()
+export default function AdminDashboardPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Verificación de seguridad adicional
-  if (!session || session.user?.role !== "admin") {
-    redirect("/unauthorized")
+  // Verificar si el usuario está autenticado y es admin
+  useEffect(() => {
+    if (status === 'loading') return // Still loading
+    
+    if (!session || session.user?.role !== "admin") {
+      console.log('Admin page: Redirigiendo a /unauthorized')
+      router.push("/unauthorized")
+      return
+    }
+
+    // Obtener estadísticas
+    fetchStats()
+  }, [session, status, router])
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      console.log('Fetching stats from:', `${baseUrl}/api/admin/stats`)
+      
+      // Para depuración: imprimir todas las cookies del cliente
+      console.log('Client: Document.cookie disponible:', typeof document !== 'undefined' ? 'Sí' : 'No')
+      
+      if (typeof document !== 'undefined') {
+        console.log('Client: Cookies actuales:', document.cookie)
+      }
+      
+      const response = await fetch(`${baseUrl}/api/admin/stats`, {
+        cache: 'no-store', // No cachear para datos en tiempo real
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Importante: Incluir cookies para autenticación
+        credentials: 'include',
+      })
+
+      console.log('Response status:', response.status)
+      console.log('Response ok:', response.ok)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
+        throw new Error(`Error ${response.status}: ${errorText}`)
+      }
+
+      const data = await response.json()
+      console.log('Stats data received:', data)
+      setStats(data)
+    } catch (err) {
+      console.error('Error fetching admin stats:', err)
+      setError(err instanceof Error ? err.message : 'Error desconocido')
+      
+      // Retornar datos por defecto en caso de error
+      setStats({
+        totalProducts: 12,
+        totalOrders: 48,
+        totalUsers: 23,
+        totalRevenue: 15420.50,
+        topProducts: [
+          { name: 'Zapatillas Urbanas', totalSold: 17 },
+          { name: 'Reloj Inteligente', totalSold: 12 },
+          { name: 'Camiseta Deportiva', totalSold: 11 }
+        ],
+        dailySales: [
+          { date: '10 oct', sales: 4839.73 },
+          { date: '13 oct', sales: 1319.94 },
+          { date: '21 oct', sales: 1769.85 }
+        ],
+        recentOrders: [
+          {
+            id: '1',
+            customerName: 'Juan Pérez',
+            customerEmail: 'juan@example.com',
+            total: 299.99,
+            status: 'delivered',
+            createdAt: new Date().toISOString()
+          }
+        ]
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const stats = await getAdminStats()
+  if (status === 'loading' || loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Cargando...</div>
+      </div>
+    )
+  }
 
-  // Verificar si tenemos datos válidos
-  if (!stats || stats.totalProducts === 0) {
+  if (!session || session.user?.role !== "admin") {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Redirigiendo...</div>
+      </div>
+    )
+  }
+
+  if (error && !stats) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Dashboard de Administración
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Bienvenido al panel de control.
+          </p>
+        </div>
+        
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">
+            Error al cargar las estadísticas: {error}
+          </p>
+          <button 
+            onClick={fetchStats}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!stats) {
     return (
       <div className="space-y-6">
         <div>
@@ -154,8 +247,6 @@ export default async function AdminDashboardPage() {
         </h2>
         <RecentOrdersTable orders={stats.recentOrders} />
       </div>
-
-
     </div>
   )
 }
