@@ -31,7 +31,7 @@ export default function AuthButton() {
         </Link>
         <Button
           onClick={() => signOut()}
-          variant="outline"
+          variant="destructive"
           size="sm"
         >
           <LogOut className="h-4 w-4 mr-2" />
