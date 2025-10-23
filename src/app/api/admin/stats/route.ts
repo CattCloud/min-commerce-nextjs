@@ -52,6 +52,14 @@ interface Stats {
   recentOrders: OrderFormatted[];
 }
 
+// Interfaz para el objeto request compatible con getToken
+interface TokenRequest {
+  headers: Record<string, string>;
+  cookies: {
+    get: (name: string) => { value: string } | undefined;
+  };
+}
+
 export async function GET(request: Request) {
   try {
     console.log('API: Iniciando solicitud de estadísticas')
@@ -83,8 +91,28 @@ export async function GET(request: Request) {
     
     // Intentar usar getToken para verificar el JWT directamente
     console.log('API: Intentando verificar token con getToken')
+    
+    // Crear un objeto compatible con NextRequest para getToken
+    const req: TokenRequest = {
+      headers: Object.fromEntries(request.headers.entries()),
+      cookies: {
+        get: (name: string) => {
+          const cookieHeader = request.headers.get('cookie')
+          if (!cookieHeader) return undefined
+          
+          const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+            const [key, value] = cookie.trim().split('=')
+            acc[key] = value
+            return acc
+          }, {} as Record<string, string>)
+          
+          return cookies[name] ? { value: cookies[name] } : undefined
+        }
+      }
+    }
+    
     const token = await getToken({ 
-      req: request as any, 
+      req, 
       secret: process.env.NEXTAUTH_SECRET 
     })
     console.log('API: Token obtenido con getToken:', token)
