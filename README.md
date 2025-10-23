@@ -11,6 +11,8 @@
 - **shadcn/ui**: Componentes estilizados y accesibles para la interfaz de usuario.
 - **Notyf**: Notificaciones elegantes y personalizables.
 
+
+
 ## Instrucciones de Instalación Local
 
 1. Clona el repositorio:

@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react'; // Importa useEffect
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Settings } from 'lucide-react';
 import { useCartStore } from '../../store/useCartStore';
 import { useSession } from 'next-auth/react';
 import CartDropdown from './CartDropdown';
@@ -40,11 +40,13 @@ const Header: React.FC = () => {
         </Link>
 
         <div className="flex items-center space-x-4">
+
+          
           {/* AuthButton - Primero para que esté a la izquierda del carrito */}
           <AuthButton />
           
-          {/* Carrito - Solo para usuarios autenticados */}
-          {session && (
+          {/* Carrito - Solo para usuarios autenticados que no sean admin */}
+          {session && session.user?.role !== "admin" && (
             <div className="relative">
               <Button
                 variant="outline"
@@ -68,6 +70,16 @@ const Header: React.FC = () => {
                 <CartDropdown onClose={closeDropdown} />
               )}
             </div>
+          )}
+                    {/* Enlace a Panel de Admin - Solo para usuarios con rol admin */}
+          {session?.user?.role === "admin" && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary-600 text-white hover:bg-primary-700 h-9 px-3"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Panel Admin</span>
+            </Link>
           )}
         </div>
         

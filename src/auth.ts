@@ -12,12 +12,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub
+        if (token.role) {
+          session.user.role = token.role
+        }
       }
       return session
     },
     jwt({ token, user }) {
       if (user) {
         token.sub = user.id
+        // Asignar rol basado en el email del usuario
+        token.role = user.email === "erick.verde@unmsm.edu.pe" ? "admin" : "user"
       }
       return token
     },

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from './auth';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Permitir todas las rutas /api sin restricciones
   if (request.nextUrl.pathname.startsWith('/api/')) {
     return NextResponse.next();
@@ -22,13 +22,19 @@ export function middleware(request: NextRequest) {
 
   if (isProtectedPath) {
     // Verificar si el usuario está autenticado
-    const session = auth();
+    const session = await auth();
     
     if (!session) {
       // Redirigir a la página de login con el callback URL
       const loginUrl = new URL('/api/auth/signin', request.url);
       loginUrl.searchParams.set('callbackUrl', request.url);
       return NextResponse.redirect(loginUrl);
+    }
+
+    // Protección específica por rol para rutas de admin
+    if (request.nextUrl.pathname.startsWith('/admin') && session.user?.role !== 'admin') {
+      // Redirigir a página de acceso denegado
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
   }
 

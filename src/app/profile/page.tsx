@@ -1,9 +1,10 @@
 import { auth } from "@/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { User, Mail, Badge, Calendar, Package, ShoppingCart, Home } from "lucide-react"
+import { User, Mail, Badge, Calendar, Package, ShoppingCart, Home, Settings } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import RoleIndicator from "@/components/RoleIndicator"
 
 export default async function ProfilePage() {
     const session = await auth()
@@ -44,7 +45,7 @@ export default async function ProfilePage() {
             <h1 className="text-2xl font-bold mb-4">Perfil de Usuario</h1>
             <Card className="bg-bg-card p-6 mb-6">
                 <CardHeader>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 space-y-2">
                       {session.user?.image ? (
                         <div className="relative">
                           <Image
@@ -64,9 +65,12 @@ export default async function ProfilePage() {
                         </div>
                       )}
                       <div>
-                        <CardTitle className="text-xl text-text-primary">
-                          {session.user?.name || "Usuario"}
-                        </CardTitle>
+                        <div className="flex items-center space-x-2 mb-2">
+                          <CardTitle className="text-xl text-text-primary">
+                            {session.user?.name || "Usuario"}
+                          </CardTitle>
+                          <RoleIndicator role={session.user?.role} size="sm" />
+                        </div>
                         <p className="text-text-secondary text-sm flex items-center">
                           <Badge className="w-2 h-2 bg-green-500 rounded-full mr-2" />
                           Miembro desde {new Date().toLocaleDateString()}
@@ -84,7 +88,6 @@ export default async function ProfilePage() {
                             </p>
                         </div>
                     </div>
-
 
                     <div className="flex items-center space-x-3">
                         <Calendar className="w-5 h-5 text-text-secondary" />
@@ -106,6 +109,19 @@ export default async function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 gap-3">
+                {/* Botón de admin - solo visible para usuarios con rol admin */}
+                {session.user?.role === "admin" && (
+                  <Link href="/admin">
+                    <Button variant="default" className="w-full justify-start h-12 group bg-primary-600 hover:bg-primary-700 text-white">
+                      <Settings className="w-5 h-5 mr-3" />
+                      <div className="text-left">
+                        <p className="font-medium">Panel de Administración</p>
+                        <p className="text-xs opacity-90">Gestionar el sistema</p>
+                      </div>
+                    </Button>
+                  </Link>
+                )}
+                
                 <Link href="/orders">
                   <Button variant="outline" className="w-full justify-start h-12 group hover:border-primary-500 transition-colors">
                     <Package className="w-5 h-5 mr-3 text-primary-500 group-hover:text-primary-600" />

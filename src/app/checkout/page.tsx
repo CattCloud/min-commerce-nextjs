@@ -93,8 +93,6 @@ export default function CheckoutPage() {
   return (
     <div className="container mx-auto px-4 pt-4">
       <h1 className="text-2xl font-bold mb-2">Pago del Producto</h1>
-
-
       <div className="grid md:grid-cols-3 gap-8">
         {/* Formulario - 2 columnas */}
         <div className="md:col-span-2">
