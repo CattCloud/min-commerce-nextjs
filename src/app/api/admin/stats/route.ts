@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
+import { prisma } from "@/lib/prisma"
 
 // Definir interfaces para los tipos de datos
 interface TopProduct {
@@ -71,9 +72,7 @@ export async function GET(request: Request) {
     let stats: Stats
     
     try {
-      // Import dinámico del cliente Prisma
-      const { PrismaClient } = await import("@/generated/prisma")
-      const prisma = new PrismaClient()
+      // Usar el cliente Prisma compartido
 
       // Estadísticas principales
       const [
