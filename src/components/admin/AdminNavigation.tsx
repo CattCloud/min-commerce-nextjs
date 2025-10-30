@@ -3,14 +3,15 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Users, 
-  Package, 
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Users,
+  Package,
   BarChart3,
   Settings,
-  LogOut
+  LogOut,
+  FileText
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 
@@ -39,6 +40,11 @@ const navigation = [
     name: "Estadísticas",
     href: "/admin/stats",
     icon: BarChart3,
+  },
+  {
+    name: "Logs",
+    href: "/admin/logs",
+    icon: FileText,
   },
   {
     name: "Configuración",
