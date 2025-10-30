@@ -102,7 +102,7 @@ sequenceDiagram
 ### Instalación
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/tu-usuario/min-commerce-nextjs.git
+   git clone https://github.com/CattCloud/min-commerce-nextjs
    cd min-commerce-nextjs
    ```
 
