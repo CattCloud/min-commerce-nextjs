@@ -22,35 +22,11 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
-    name: "Productos",
-    href: "/admin/products",
-    icon: Package,
-  },
-  {
-    name: "Órdenes",
-    href: "/admin/orders",
-    icon: ShoppingCart,
-  },
-  {
-    name: "Usuarios",
-    href: "/admin/users",
-    icon: Users,
-  },
-  {
-    name: "Estadísticas",
-    href: "/admin/stats",
-    icon: BarChart3,
-  },
-  {
     name: "Logs",
     href: "/admin/logs",
     icon: FileText,
   },
-  {
-    name: "Configuración",
-    href: "/admin/settings",
-    icon: Settings,
-  },
+
 ]
 
 export function AdminNavigation() {

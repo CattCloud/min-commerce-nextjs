@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@/prisma';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // Esta función maneja las peticiones GET a /api/products
 export async function GET() {
@@ -13,7 +11,5 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

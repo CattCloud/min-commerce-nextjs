@@ -30,7 +30,7 @@ export default function AuthButton() {
           <RoleIndicator role={session.user?.role} size="sm" />
         </Link>
         <Button
-          onClick={() => signOut()}
+          onClick={() => signOut({ callbackUrl: '/' })}
           variant="destructive"
           size="sm"
         >

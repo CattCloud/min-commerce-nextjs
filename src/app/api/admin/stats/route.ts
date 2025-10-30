@@ -149,11 +149,8 @@ export async function GET(request: Request) {
         orderBy: { createdAt: 'desc' }
       })
 
-      // Usuarios únicos
-      const uniqueUsers = await prisma.order.groupBy({
-        by: ['customerEmail'],
-        _count: { customerEmail: true }
-      })
+      // Usuarios reales registrados en el sistema
+      const totalUsers = await prisma.user.count()
 
       // Top productos
       const topProducts = await prisma.orderItem.groupBy({
@@ -188,7 +185,7 @@ export async function GET(request: Request) {
       stats = {
         totalProducts,
         totalOrders,
-        totalUsers: uniqueUsers.length,
+        totalUsers: totalUsers,
         totalRevenue: totalSales._sum.total || 0,
         topProducts: topProductsWithNames,
         dailySales: dailySales.reverse().map((item: DailySale) => ({

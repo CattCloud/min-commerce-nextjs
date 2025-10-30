@@ -1,55 +1,34 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { checkAccess } from './lib/access-control';
+import { getToken } from 'next-auth/jwt';
+import { checkAccess, requiresAuthentication } from './lib/access-control';
 import type { UserRole } from './lib/access-control';
 
-function getSessionToken(req: NextRequest): string {
-  return (
-    req.cookies.get('__Secure-authjs.session-token')?.value ??
-    req.cookies.get('authjs.session-token')?.value ??
-    req.cookies.get('next-auth.session-token')?.value ??
-    ''
-  );
-}
-
-function base64UrlToString(b64url: string): string {
-  const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
-  const pad = '='.repeat((4 - (b64.length % 4)) % 4);
-  return globalThis.atob(b64 + pad);
-}
-
-interface JwtPayload {
-  role?: string;
-}
-
-function extractRoleFromJwt(token: string): string {
-  try {
-    const parts = token.split('.');
-    if (parts.length < 2) return '';
-    const json = base64UrlToString(parts[1]);
-    const payload = JSON.parse(json) as unknown;
-    if (payload && typeof payload === 'object' && 'role' in payload) {
-      const value = (payload as Record<string, unknown>).role;
-      return typeof value === 'string' ? value : '';
-    }
-    return '';
-  } catch {
-    return '';
-  }
-}
-
-function toUserRole(value: string): UserRole {
+function toUserRole(value: string | undefined): UserRole {
   return value === 'admin' || value === 'user' ? (value as UserRole) : '';
 }
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   
-  // Obtener token y rol desde cookie (sin importar next-auth en middleware)
-  const token = getSessionToken(request);
-  const rawRole = extractRoleFromJwt(token);
-  const role: UserRole = toUserRole(rawRole);
-  const isAuthenticated = token.length > 0;
+  // Usar getToken de NextAuth para obtener el token JWT correctamente
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === 'production'
+  });
+  
+  const role: UserRole = toUserRole(token?.role as string);
+  const isAuthenticated = !!token;
+
+  // Redirección inteligente post-autenticación según rol
+  if (isAuthenticated && (path === '/' || path === '/welcome')) {
+    if (role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    } else if (role === 'user') {
+      return NextResponse.redirect(new URL('/catalog', request.url));
+    }
+  }
 
   // Usar el sistema de control de acceso centralizado
   const accessResult = checkAccess(path, role, isAuthenticated);

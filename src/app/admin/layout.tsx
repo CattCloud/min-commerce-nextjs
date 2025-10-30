@@ -17,9 +17,8 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <h1 className="text-2xl font-bold my-2 mx-8">Panel de Administracion</h1>
 
-      <div className="max-w-7xl mx-auto px-4  py-8">
+      <div className="max-w-7xl mx-auto px-4  py-6">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Navegación lateral */}
           <aside className="lg:w-64 flex-shrink-0">

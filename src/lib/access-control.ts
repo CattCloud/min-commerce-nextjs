@@ -18,7 +18,7 @@ export type UserRole = 'admin' | 'user' | '';
  */
 const ROUTE_ACCESS_CONFIG = {
   // Rutas públicas - accesibles sin autenticación
-  public: ['/', '/api/auth/signin', '/api/auth/callback'],
+  public: ['/', '/welcome', '/api/auth/signin', '/api/auth/callback'],
   
   // Rutas de API - por defecto sin restricciones
   api: '/api/',
@@ -27,7 +27,7 @@ const ROUTE_ACCESS_CONFIG = {
   admin: '/admin',
   
   // Rutas de usuario autenticado - cualquier usuario logueado
-  authenticated: ['/profile', '/checkout', '/orders', '/cart'],
+  authenticated: ['/profile', '/checkout', '/orders', '/cart', '/catalog'],
   
   // Dashboard - accesible por admin y user
   dashboard: '/dashboard',
