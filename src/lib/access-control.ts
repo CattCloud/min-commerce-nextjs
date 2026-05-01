@@ -29,8 +29,6 @@ const ROUTE_ACCESS_CONFIG = {
   // Rutas de usuario autenticado - cualquier usuario logueado
   authenticated: ['/profile', '/checkout', '/orders', '/cart', '/catalog'],
   
-  // Dashboard - accesible por admin y user
-  dashboard: '/dashboard',
 };
 
 /**
@@ -64,10 +62,7 @@ export function hasAccess(path: string, role: UserRole): boolean {
     return role === 'admin';
   }
   
-  // Dashboard - accesible por admin y user (requiere autenticación)
-  if (path.startsWith(ROUTE_ACCESS_CONFIG.dashboard)) {
-    return role !== ''; // Cualquier usuario autenticado
-  }
+
   
   // Rutas de usuario autenticado - cualquier usuario logueado
   for (const authenticatedPath of ROUTE_ACCESS_CONFIG.authenticated) {
@@ -124,10 +119,7 @@ export function getAccessType(path: string): 'public' | 'authenticated' | 'admin
     return 'admin';
   }
   
-  // Dashboard
-  if (path.startsWith(ROUTE_ACCESS_CONFIG.dashboard)) {
-    return 'dashboard';
-  }
+
   
   // Rutas autenticadas
   for (const authenticatedPath of ROUTE_ACCESS_CONFIG.authenticated) {
@@ -228,7 +220,7 @@ export function checkAccess(
 export const PUBLIC_PATHS = ROUTE_ACCESS_CONFIG.public;
 export const API_PREFIX = ROUTE_ACCESS_CONFIG.api;
 export const ADMIN_PREFIX = ROUTE_ACCESS_CONFIG.admin;
-export const DASHBOARD_PATH = ROUTE_ACCESS_CONFIG.dashboard;
+
 export const AUTHENTICATED_PATHS = ROUTE_ACCESS_CONFIG.authenticated;
 
 /**
@@ -243,6 +235,5 @@ export const ACCESS_CONTROL_CONFIG = {
   PUBLIC_PATHS,
   API_PREFIX,
   ADMIN_PREFIX,
-  DASHBOARD_PATH,
   AUTHENTICATED_PATHS,
 } as const;

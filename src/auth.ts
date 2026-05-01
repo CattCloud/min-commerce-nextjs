@@ -10,7 +10,7 @@ const db: DbClient = prisma as DbClient
 
 
 
-// 🔹 Definimos un tipo compatible con la firma real de NextAuth
+//  Definimos un tipo compatible con la firma real de NextAuth
 type SignOutEventMessage = {
   session?: void | AdapterSession | null
   token?: JWT | null
